@@ -174,11 +174,6 @@ int main() {
 						flight_time, flight_data.altitude_m, flight_data.velocity);
 				fflush(log_file);
 			}
-
-			if (flight_data.altitude_m > 100000) {
-				printf("\n SPACE REACHED! (Kármán Line at 100km) \n");
-				break;
-			}
 		}
 	} else {
 		printf("\n*** LAUNCH ABORT. CHECK THE LOGS FOR MORE DETAIL. ***\n");

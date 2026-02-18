@@ -18,6 +18,7 @@
 #define GRAVITY 9.81
 #define LOG_FILE "telemetry.txt"
 #define STARTING_FUEL_PERCENT 100
+#define ENGINE_ACCELERATION_FORCE 20 // m/s²
 
 enum LaunchStatus {
 	STATUS_STANDBY = 0,
@@ -53,6 +54,7 @@ typedef struct Telemetry {
 	uint16_t chamber_pressure;
 	int16_t altitude_m;
 	SystemFlags systems;
+	uint16_t velocity;
 }TelemetryPacket;
 
 // ========== FUNCTIONS ==========
@@ -66,6 +68,11 @@ void ABORT_OPERATION(TelemetryPacket *telemetry) {
 
 void init_systems(SystemFlags *sys) {
 	sys->all = 0xFF;
+}
+
+void update_flight_physics(TelemetryPacket *telemetry, uint8_t flight_time) {
+	telemetry->velocity = ENGINE_ACCELERATION_FORCE * flight_time;
+	telemetry ->altitude_m = (uint16_t)(0.5f * ENGINE_ACCELERATION_FORCE * flight_time * flight_time);
 }
 
 uint8_t read_sensors() {
@@ -118,7 +125,7 @@ int main() {
 		printf("Logs will be visible on terminal only.");
 	}
 
-	printf("== ROKET FIRLATMA KONTROL MERKEZİ ==\n");
+	printf("== ROCKET LAUNCH CONTROL CENTER ==\n");
     printf("====================================\n\n");
 
 	uint8_t launch_success = 1;
@@ -153,11 +160,24 @@ int main() {
 	}
 	fclose(log_file);
 	if (launch_success) {
-		printf("\n----- ATEŞLEME! -----\n");
-		printf("||| ROKET HAVALANDI! YUKSELIS BASLIYOR... |||\n");
-		// Fizik motoru buraya gelecek!
+		printf("\n----- IGNITION! -----\n");
+		printf("||| ROCKET ABROAD! GAINING ALTITUDE... |||\n");
+
+		for (uint16_t flight_time = 1; flight_time <= 10; flight_time++) {
+			update_flight_physics(&flight_data, flight_time);
+
+			printf("FLIGHT T+%2d s | Altitude: %5d m | Velocity: %3d m/s\n",
+				flight_time, flight_data.altitude_m, (20 * flight_time));
+
+
+			if (log_file != NULL) {
+				fprintf(log_file, "FLIGHT T+%d, Alt:%d m, Vel:%d m/s\n",
+						flight_time, flight_data.altitude_m, (20 * flight_time));
+				fflush(log_file);
+			}
+		}
 	} else {
-		printf("\n*** FIRLATMA IPTAL EDILDI. LOGLARI KONTROL EDIN. ***\n");
+		printf("\n*** LAUNCH ABORT. CHECK THE LOGS FOR MORE DETAIL. ***\n");
 	}
 
 	return 0;

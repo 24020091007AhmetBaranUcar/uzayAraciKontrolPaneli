@@ -72,7 +72,7 @@ void init_systems(SystemFlags *sys) {
 
 void update_flight_physics(TelemetryPacket *telemetry, uint8_t flight_time) {
 	telemetry->velocity = (uint16_t)((ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time);
-	telemetry ->altitude_m = (uint16_t)(0.5f * ENGINE_ACCELERATION_FORCE * flight_time * flight_time);
+	telemetry ->altitude_m = (uint16_t)(0.5f * (ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time * flight_time);
 }
 
 uint8_t read_sensors() {

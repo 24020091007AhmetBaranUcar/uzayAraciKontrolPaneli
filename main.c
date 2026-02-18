@@ -71,7 +71,7 @@ void init_systems(SystemFlags *sys) {
 }
 
 void update_flight_physics(TelemetryPacket *telemetry, uint8_t flight_time) {
-	telemetry->velocity = ENGINE_ACCELERATION_FORCE * flight_time;
+	telemetry->velocity = (uint16_t)((ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time);
 	telemetry ->altitude_m = (uint16_t)(0.5f * ENGINE_ACCELERATION_FORCE * flight_time * flight_time);
 }
 
@@ -158,7 +158,6 @@ int main() {
 				sleep(1);
 		#endif
 	}
-	fclose(log_file);
 	if (launch_success) {
 		printf("\n----- IGNITION! -----\n");
 		printf("||| ROCKET ABROAD! GAINING ALTITUDE... |||\n");
@@ -180,6 +179,10 @@ int main() {
 		printf("\n*** LAUNCH ABORT. CHECK THE LOGS FOR MORE DETAIL. ***\n");
 	}
 
+
+	if (log_file != NULL) {
+		fclose(log_file);
+	}
 	return 0;
 
 }

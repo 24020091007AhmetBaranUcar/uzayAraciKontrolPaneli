@@ -18,7 +18,7 @@
 #define GRAVITY 9.81
 #define LOG_FILE "telemetry.txt"
 #define STARTING_FUEL_PERCENT 100
-#define ENGINE_ACCELERATION_FORCE 20 // m/s²
+#define ENGINE_ACCELERATION_FORCE 60 // m/s²
 
 enum LaunchStatus {
 	STATUS_STANDBY = 0,
@@ -52,9 +52,9 @@ typedef struct Telemetry {
 	uint8_t engine_temp_c;
 	uint8_t fuel_percent;
 	uint16_t chamber_pressure;
-	int16_t altitude_m;
+	float altitude_m;
 	SystemFlags systems;
-	uint16_t velocity;
+	float velocity;
 }TelemetryPacket;
 
 // ========== FUNCTIONS ==========
@@ -71,8 +71,8 @@ void init_systems(SystemFlags *sys) {
 }
 
 void update_flight_physics(TelemetryPacket *telemetry, uint8_t flight_time) {
-	telemetry->velocity = (uint16_t)((ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time);
-	telemetry ->altitude_m = (uint16_t)(0.5f * (ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time * flight_time);
+	telemetry->velocity = (ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time;
+	telemetry ->altitude_m =0.5 * (ENGINE_ACCELERATION_FORCE - GRAVITY) * flight_time * flight_time;
 }
 
 uint8_t read_sensors() {
@@ -162,17 +162,22 @@ int main() {
 		printf("\n----- IGNITION! -----\n");
 		printf("||| ROCKET ABROAD! GAINING ALTITUDE... |||\n");
 
-		for (uint16_t flight_time = 1; flight_time <= 10; flight_time++) {
+		for (uint8_t flight_time = 1; flight_time <= 10; flight_time++) {
 			update_flight_physics(&flight_data, flight_time);
 
-			printf("FLIGHT T+%2d s | Altitude: %5d m | Velocity: %3d m/s\n",
+			printf("FLIGHT T+%d s | Altitude: %.f m | Velocity: %.f m/s\n",
 				flight_time, flight_data.altitude_m, flight_data.velocity);
 
 
 			if (log_file != NULL) {
-				fprintf(log_file, "FLIGHT T+%d, Alt:%d m, Vel:%d m/s\n",
-						flight_time, flight_data.altitude_m, (20 * flight_time));
+				fprintf(log_file, "FLIGHT T+%d, Alt:%.f m, Vel:%.f m/s\n",
+						flight_time, flight_data.altitude_m, flight_data.velocity);
 				fflush(log_file);
+			}
+
+			if (flight_data.altitude_m > 100000) {
+				printf("\n SPACE REACHED! (Kármán Line at 100km) \n");
+				break;
 			}
 		}
 	} else {

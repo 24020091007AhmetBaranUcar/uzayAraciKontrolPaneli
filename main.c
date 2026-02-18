@@ -160,7 +160,7 @@ int main() {
 	}
 	if (launch_success) {
 		printf("\n----- IGNITION! -----\n");
-		printf("||| ROCKET ABROAD! GAINING ALTITUDE... |||\n");
+		printf("||| ROCKET IS LAUNCHED! GAINING ALTITUDE... |||\n");
 
 		for (uint8_t flight_time = 1; flight_time <= 10; flight_time++) {
 			update_flight_physics(&flight_data, flight_time);

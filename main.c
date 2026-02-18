@@ -167,7 +167,7 @@ int main() {
 			update_flight_physics(&flight_data, flight_time);
 
 			printf("FLIGHT T+%2d s | Altitude: %5d m | Velocity: %3d m/s\n",
-				flight_time, flight_data.altitude_m, (20 * flight_time));
+				flight_time, flight_data.altitude_m, flight_data.velocity);
 
 
 			if (log_file != NULL) {
